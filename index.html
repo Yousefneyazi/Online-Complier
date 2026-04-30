@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sneaky Sneak — Compiler Dashboard</title>
+    <meta name="description" content="Sneaky Sneak compiler dashboard: interactive stage-by-stage Python compilation visualizer.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-slate-950 text-slate-200 min-h-screen selection:bg-indigo-500/30" style="font-family: 'Inter', sans-serif;">
+    <div class="max-w-[1600px] mx-auto p-4 lg:p-6">
+
+        <!-- Header -->
+        <header class="mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/sneakysneak-home" class="text-slate-400 hover:text-slate-200 transition-colors" title="Back to Home">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <h1 class="text-2xl lg:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                    Sneaky Sneak
+                </h1>
+            </div>
+
+        </header>
+
+        <!-- Main Grid: Input on left, Outputs on right -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+            <!-- Input Section (left column) -->
+            <div class="lg:col-span-4 bg-slate-900/50 backdrop-blur-sm p-5 rounded-2xl shadow-2xl border border-slate-800/80 flex flex-col" style="max-height: calc(100vh - 120px);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                        <h2 class="text-sm font-semibold text-slate-100 uppercase tracking-wider">Source Code</h2>
+                    </div>
+                    <select id="exampleSelect" onchange="loadExample()" class="text-xs bg-slate-800 text-slate-300 border border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                        <option>-- Select Example --</option>
+                        <option>Arithmetic</option>
+                        <option>If / Elif / Else</option>
+                        <option>While Loop</option>
+                        <option>For Loop</option>
+                        <option>Nested Loops</option>
+                        <option>Logical Operators</option>
+                        <option>Fibonacci</option>
+                        <option>Factorial</option>
+                    </select>
+                </div>
+                <!-- Editor with line numbers -->
+                <div class="editor-wrapper flex-grow flex rounded-xl border border-slate-800 overflow-hidden shadow-inner bg-slate-950/80">
+                    <pre id="lineNumbers" class="line-numbers-gutter custom-scrollbar" aria-hidden="true">1
+</pre>
+                    <textarea id="codeInput"
+                        class="w-full bg-transparent text-emerald-400 font-mono text-sm leading-relaxed p-4 pl-2 focus:outline-none resize-none custom-scrollbar"
+                        style="font-family: 'JetBrains Mono', monospace; min-height: 200px;"
+                        spellcheck="false"
+                        placeholder="Enter Python code here..."></textarea>
+                </div>
+                <button id="compileBtn" onclick="compileCode()"
+                    class="mt-4 w-full relative group overflow-hidden rounded-xl bg-indigo-600 px-6 py-3.5 transition-all hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed">
+                    <span class="relative z-10 font-bold text-white tracking-wider flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        RUN COMPILER
+                    </span>
+                </button>
+            </div>
+
+            <!-- Output Section (right columns) -->
+            <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4" style="max-height: calc(100vh - 120px);">
+
+                <!-- Stage 1: Tokens (Lexer) -->
+                <div class="output-panel bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800/80 shadow-xl flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 flex-shrink-0">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400">Stage 1: Tokens (Lexer)</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-800/50 px-2 py-0.5 rounded">JSON</span>
+                            <button onclick="copyOutput('lexerOutput')" class="copy-btn" title="Copy to clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lexerOutput" class="output-content font-mono whitespace-pre text-sm text-indigo-300 custom-scrollbar" style="font-family: 'JetBrains Mono', monospace;">Waiting for input...</div>
+                </div>
+
+                <!-- Stage 2: Syntax Tree (Parser) -->
+                <div class="output-panel bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800/80 shadow-xl flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 flex-shrink-0">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-fuchsia-400">Stage 2: Syntax Tree (Parser)</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-800/50 px-2 py-0.5 rounded">JSON</span>
+                            <button onclick="copyOutput('parserOutput')" class="copy-btn" title="Copy to clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="parserOutput" class="output-content font-mono whitespace-pre text-sm text-fuchsia-300 custom-scrollbar" style="font-family: 'JetBrains Mono', monospace;">Waiting for input...</div>
+                </div>
+
+                <!-- Stage 3: Assembly (Generator) -->
+                <div class="output-panel bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800/80 shadow-xl flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 flex-shrink-0">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-amber-400">Stage 3: Assembly (Generator)</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-800/50 px-2 py-0.5 rounded">ASM</span>
+                            <button onclick="copyOutput('assemblyOutput')" class="copy-btn" title="Copy to clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="assemblyOutput" class="output-content font-mono whitespace-pre text-sm text-amber-300 custom-scrollbar" style="font-family: 'JetBrains Mono', monospace;">Waiting for input...</div>
+                </div>
+
+                <!-- Stage 4: Execution Output -->
+                <div class="output-panel bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800/80 shadow-xl flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 flex-shrink-0">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400">Stage 4: Execution Output</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-800/50 px-2 py-0.5 rounded">TXT</span>
+                            <button onclick="copyOutput('executionOutput')" class="copy-btn" title="Copy to clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="executionOutput" class="output-content font-mono whitespace-pre text-sm text-emerald-300 custom-scrollbar" style="font-family: 'JetBrains Mono', monospace;">Waiting for execution...</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
